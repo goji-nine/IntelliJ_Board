@@ -3,9 +3,11 @@ package com.jisoo.board.controller;
 import com.jisoo.board.dto.BoardDTO;
 import com.jisoo.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.Banner;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.io.IOException;
@@ -25,7 +27,7 @@ public class BoardController {
     public String save(BoardDTO boardDTO) throws IOException {
         System.out.println("boardDTO = " + boardDTO);
         boardService.save(boardDTO);
-        return "index";
+        return "redirect:/list";
     }
 
     @GetMapping("/list")
@@ -35,4 +37,31 @@ public class BoardController {
         System.out.println("boardDDTOList =" + boardDDTOList);
         return "list";
     }
+
+    @GetMapping("/{id}")
+    public String findById(@PathVariable("id") Long id, Model model) {
+        //조회수 처리
+        boardService.updateHits(id);
+        //상세내용 가져오기
+        BoardDTO boardDTO = boardService.findById(id);
+        model.addAttribute("board", boardDTO);
+        System.out.println("boardDTO = " + boardDTO);
+        return "detail";
+    }
+
+    @GetMapping("/update/{id}")
+    public String update(@PathVariable("id") Long id, Model model) {
+        BoardDTO boardDTO = boardService.findById(id);
+        model.addAttribute("board", boardDTO);
+        return "update";
+    }
+
+    @PostMapping("/update/{id}")
+    public String update(BoardDTO boardDTO, Model model){
+        boardService.update(boardDTO);
+        BoardDTO dto = boardService.findById(boardDTO.getId());
+        model.addAttribute("board", dto);
+        return "detail";
+    }
+
 }
